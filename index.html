@@ -27,126 +27,146 @@ function tempToRGB(temp){
 function tempToColor(t){const[r,g,b]=tempToRGB(t);return`rgb(${r},${g},${b})`;}
 
 /* risk */
-const PAIRS=[["f02","f03"],["f05","f06"],["f07","f08"],["f09","f10"],["f12","f13"],["f14","f15"],["f16","f17"],["f18","f19"],["f20","f21"],["f25","f26"],["f27","f28"],["f29","f30"],["f31","f32"],["f33","f34"],["f35","f36"],["f37","f38"],["f39","f40"],["b02","b03"],["b05","b06"],["b07","b08"],["b09","b10"],["b11","b12"],["b13","b14"],["b15","b16"],["b17","b18"],["b19","b20"],["b22","b23"],["b24","b25"],["b27","b28"],["b29","b30"],["b31","b32"],["b33","b34"],["b35","b36"],["b37","b38"],["b39","b40"]];
+const PAIRS=[
+  ["f02","f03"],["f04","f05"],["f07","f08"],["f09","f10"],["f11","f12"],
+  ["f13","f14"],["f15","f16"],["f17","f18"],["f19","f20"],["f21","f22"],
+  ["f23","f24"],["f25","f26"],["f27","f28"],["f29","f30"],["f31","f32"],
+  ["f33","f34"],["f35","f36"],["f37","f38"],["f39","f40"],["f41","f42"],
+  ["f43","f44"],["f45","f46"],["f55","f56"],["f47","f48"],["f49","f50"],
+  ["f51","f52"],["f53","f54"],["f57","f58"],
+  ["b02","b03"],["b04","b05"],["b07","b08"],["b09","b10"],["b11","b12"],
+  ["b13","b14"],["b15","b16"],["b17","b18"],["b19","b20"],["b21","b22"],
+  ["b23","b24"],["b25","b26"],["b27","b28"],["b29","b30"],["b31","b32"],
+  ["b33","b34"],["b35","b36"],["b37","b38"],["b39","b40"],["b41","b42"],
+  ["b43","b44"],["b45","b46"],["b57","b58"],["b47","b48"],["b49","b50"],
+  ["b51","b52"],["b53","b54"],["b55","b56"]
+];
 function computeRisk(regions){
   const m=Object.fromEntries(regions.map(r=>[r.id,r.temp]));
   const p=PAIRS.filter(([a,b])=>m[a]&&m[b]);
   return p.length?Math.min(100,Math.round(p.reduce((s,[a,b])=>s+Math.abs(m[a]-m[b]),0)/p.length*50)):0;
 }
 
-/* ── Corrected anatomical dots ────────────────────────────────
-   All positions verified against pixel boundary scan of the 260×280 PNG.
-   Front arms end at y=147 (boundary [36,114]→[52,97]).
-   Back arms end  at y=152 (boundary [144,219]→[158,205]).
-   Global shift: +3 px upward applied where boundary allows.
-──────────────────────────────────────────────────────────────*/
 const FRONT_DOTS=[
-  // HEAD (y=10-42: [66,84])
-  {id:"f01",label:"Forehead",              cx:74, cy:13},
-  {id:"f02",label:"Left Temple",            cx:67, cy:20},  // y=20:[66,84] ✓
-  {id:"f03",label:"Right Temple",           cx:83, cy:20},
-  // NECK (y=46:[60,89])
-  {id:"f04",label:"Throat",                cx:74, cy:46},
-  {id:"f05",label:"Left Neck",              cx:63, cy:46},
-  {id:"f06",label:"Right Neck",             cx:85, cy:46},
-  // SHOULDERS (y=55:[43,106] — cannot go higher: cx=44/104 exit bounds above y=54)
-  {id:"f07",label:"Left Anterior Shoulder", cx:44, cy:55},
-  {id:"f08",label:"Right Anterior Shoulder",cx:104,cy:55},
-  // CHEST (y=71:[42,107])
-  {id:"f09",label:"Left Pectoral",          cx:60, cy:71},
-  {id:"f10",label:"Right Pectoral",         cx:88, cy:71},
-  {id:"f11",label:"Sternum",               cx:74, cy:67},
-  // ARMS — within arm zone boundary (left ~40-50, right ~99-109)
-  {id:"f12",label:"Left Bicep",             cx:44, cy:82},  // y=82:[40,109] ✓
-  {id:"f13",label:"Right Bicep",            cx:104,cy:82},
-  {id:"f14",label:"Left Anterior Elbow",    cx:41, cy:104}, // y=104:[38,112] ✓
-  {id:"f15",label:"Right Anterior Elbow",   cx:108,cy:104},
-  {id:"f16",label:"Left Forearm",           cx:41, cy:122}, // y=122:[38,111] ✓
-  {id:"f17",label:"Right Forearm",          cx:108,cy:122},
-  {id:"f18",label:"Left Wrist",             cx:39, cy:137}, // y=137:[35,114] ✓
-  {id:"f19",label:"Right Wrist",            cx:110,cy:137},
-  {id:"f20",label:"Left Hand",              cx:38, cy:144}, // y=144:[35,114] ✓ — arms end y=147
-  {id:"f21",label:"Right Hand",             cx:111,cy:144},
-  // ABDOMEN
-  {id:"f22",label:"Upper Abdomen",          cx:74, cy:88},  // y=88:[40,109] ✓
-  {id:"f23",label:"Navel",                 cx:74, cy:105}, // y=105:[38,112] ✓
-  {id:"f24",label:"Lower Abdomen",          cx:74, cy:123},
-  {id:"f25",label:"Left Oblique",           cx:55, cy:105},
-  {id:"f26",label:"Right Oblique",          cx:93, cy:105},
-  // HIPS — FIXED: moved to y=147 (first y WITHOUT arms, boundary=[52,97])
-  {id:"f27",label:"Left Hip / Iliac Crest", cx:53, cy:147},
-  {id:"f28",label:"Right Hip / Iliac Crest",cx:96, cy:147},
-  // GROIN (y=150:[52,97])
-  {id:"f29",label:"Left Groin",             cx:63, cy:150},
-  {id:"f30",label:"Right Groin",            cx:85, cy:150},
-  // THIGHS (y=169:[55,94])
-  {id:"f31",label:"Left Quadricep",         cx:63, cy:169},
-  {id:"f32",label:"Right Quadricep",        cx:85, cy:169},
-  {id:"f33",label:"Left Inner Thigh",       cx:68, cy:172},
-  {id:"f34",label:"Right Inner Thigh",      cx:80, cy:172},
-  // KNEES (y=204:~[59,90])
-  {id:"f35",label:"Left Anterior Knee",     cx:64, cy:204},
-  {id:"f36",label:"Right Anterior Knee",    cx:84, cy:204},
-  // SHINS (y=222:[60,89])
-  {id:"f37",label:"Left Shin / Tibia",      cx:64, cy:222},
-  {id:"f38",label:"Right Shin / Tibia",     cx:83, cy:222},
-  // ANKLES (y=233:[59,91])
-  {id:"f39",label:"Left Anterior Ankle",    cx:64, cy:233},
-  {id:"f40",label:"Right Anterior Ankle",   cx:83, cy:233},
+  {id:"f01",label:"Forehead",        cx:76, cy:13},
+  {id:"f02",label:"Left Temple",     cx:67, cy:20},
+  {id:"f03",label:"Right Temple",    cx:83, cy:20},
+  {id:"f04",label:"Left Neck",       cx:63, cy:48},
+  {id:"f05",label:"Right Neck",      cx:87, cy:48},
+  {id:"f06",label:"Throat",          cx:75, cy:40},
+  {id:"f07",label:"Left Shoulder",   cx:47, cy:56},
+  {id:"f08",label:"Right Shoulder",  cx:103,cy:56},
+  {id:"f09",label:"L Upper Chest",   cx:63, cy:61},
+  {id:"f10",label:"R Upper Chest",   cx:87, cy:61},
+  {id:"f11",label:"L Lower Chest",   cx:63, cy:74},
+  {id:"f12",label:"R Lower Chest",   cx:87, cy:74},
+  {id:"f13",label:"L UpperArm Prox", cx:47, cy:69},
+  {id:"f14",label:"R UpperArm Prox", cx:103,cy:69},
+  {id:"f15",label:"L UpperArm Mid",  cx:47, cy:79},
+  {id:"f16",label:"R UpperArm Mid",  cx:103,cy:79},
+  {id:"f17",label:"L UpperArm Dist", cx:46, cy:89},
+  {id:"f18",label:"R UpperArm Dist", cx:104,cy:89},
+  {id:"f19",label:"Left Elbow",      cx:45, cy:98},
+  {id:"f20",label:"Right Elbow",     cx:105,cy:98},
+  {id:"f21",label:"L LowerArm Prox", cx:44, cy:105},
+  {id:"f22",label:"R LowerArm Prox", cx:106,cy:105},
+  {id:"f23",label:"L LowerArm Mid",  cx:43, cy:113},
+  {id:"f24",label:"R LowerArm Mid",  cx:107,cy:113},
+  {id:"f25",label:"L LowerArm Dist", cx:42, cy:121},
+  {id:"f26",label:"R LowerArm Dist", cx:108,cy:121},
+  {id:"f27",label:"Left Wrist",      cx:41, cy:128},
+  {id:"f28",label:"Right Wrist",     cx:109,cy:128},
+  {id:"f29",label:"Left Fingers",    cx:40, cy:139},
+  {id:"f30",label:"Right Fingers",   cx:110,cy:139},
+  {id:"f31",label:"L Abdomen Prox",  cx:67, cy:86},
+  {id:"f32",label:"R Abdomen Prox",  cx:83, cy:86},
+  {id:"f33",label:"L Abdomen Mid",   cx:68, cy:100},
+  {id:"f34",label:"R Abdomen Mid",   cx:82, cy:100},
+  {id:"f35",label:"L Abdomen Dist",  cx:68, cy:114},
+  {id:"f36",label:"R Abdomen Dist",  cx:82, cy:114},
+  {id:"f37",label:"Left Hip",        cx:57, cy:129},
+  {id:"f38",label:"Right Hip",       cx:93, cy:129},
+  {id:"f39",label:"Left Groin",      cx:70, cy:134},
+  {id:"f40",label:"Right Groin",     cx:80, cy:134},
+  {id:"f41",label:"L Quad Prox",     cx:62, cy:146},
+  {id:"f42",label:"R Quad Prox",     cx:88, cy:146},
+  {id:"f43",label:"L Quad Mid",      cx:61, cy:158},
+  {id:"f44",label:"R Quad Mid",      cx:89, cy:158},
+  {id:"f45",label:"L Quad Dist",     cx:62, cy:170},
+  {id:"f46",label:"R Quad Dist",     cx:88, cy:170},
+  {id:"f55",label:"Left Knee",       cx:61, cy:186},
+  {id:"f56",label:"Right Knee",      cx:89, cy:187},
+  {id:"f47",label:"L Calf Prox",     cx:62, cy:195},
+  {id:"f48",label:"R Calf Prox",     cx:87, cy:196},
+  {id:"f49",label:"L Calf Mid",      cx:64, cy:205},
+  {id:"f50",label:"R Calf Mid",      cx:86, cy:205},
+  {id:"f51",label:"L Calf Dist",     cx:64, cy:215},
+  {id:"f52",label:"R Calf Dist",     cx:86, cy:215},
+  {id:"f53",label:"Left Ankle",      cx:65, cy:226},
+  {id:"f54",label:"Right Ankle",     cx:85, cy:226},
+  {id:"f57",label:"Left Forefoot",   cx:63, cy:239},
+  {id:"f58",label:"Right Forefoot",  cx:87, cy:239},
 ];
 
 const BACK_DOTS=[
-  // HEAD (y=20:[172,190])
-  {id:"b01",label:"Posterior Skull",           cx:181,cy:13},
-  {id:"b02",label:"Left Posterior Head",        cx:175,cy:20},
-  {id:"b03",label:"Right Posterior Head",       cx:188,cy:20},
-  // NECK (y=44:~[168,195])
-  {id:"b04",label:"Posterior Neck",            cx:181,cy:46},
-  {id:"b05",label:"Left Cervical Paraspinal",   cx:173,cy:44},
-  {id:"b06",label:"Right Cervical Paraspinal",  cx:189,cy:44},
-  // SHOULDERS / UPPER BACK (y=59:~[149,214])
-  {id:"b07",label:"Left Trapezius",            cx:163,cy:59},
-  {id:"b08",label:"Right Trapezius",           cx:199,cy:59},
-  {id:"b09",label:"Left Posterior Shoulder",   cx:150,cy:63},
-  {id:"b10",label:"Right Posterior Shoulder",  cx:212,cy:63},
-  {id:"b11",label:"Left Scapula",              cx:167,cy:77},
-  {id:"b12",label:"Right Scapula",             cx:196,cy:77},
-  // BACK ARMS (left ~146-158, right ~205-217)
-  {id:"b13",label:"Left Tricep",               cx:151,cy:82},  // y=82:[146,217] ✓
-  {id:"b14",label:"Right Tricep",              cx:210,cy:82},
-  {id:"b15",label:"Left Posterior Elbow",      cx:148,cy:104}, // y=104:[143,219] ✓
-  {id:"b16",label:"Right Posterior Elbow",     cx:213,cy:104},
-  {id:"b17",label:"Left Posterior Forearm",    cx:148,cy:122},
-  {id:"b18",label:"Right Posterior Forearm",   cx:213,cy:122},
-  {id:"b19",label:"Left Posterior Wrist",      cx:146,cy:140}, // y=140:[141,222] ✓ — back arms end y=152
-  {id:"b20",label:"Right Posterior Wrist",     cx:215,cy:140},
-  // MID/LOWER BACK (spine centre ~181)
-  {id:"b21",label:"Mid Thoracic Spine",         cx:181,cy:89},
-  {id:"b22",label:"Left Latissimus Dorsi",      cx:167,cy:99},
-  {id:"b23",label:"Right Latissimus Dorsi",     cx:196,cy:99},
-  {id:"b24",label:"Left Lumbar Paraspinal",     cx:175,cy:118},
-  {id:"b25",label:"Right Lumbar Paraspinal",    cx:187,cy:118},
-  {id:"b26",label:"Sacrum",                    cx:181,cy:132},
-  // GLUTES (y=152:[158,205] — first y without back arms)
-  {id:"b27",label:"Left Gluteus",              cx:165,cy:155},
-  {id:"b28",label:"Right Gluteus",             cx:198,cy:155},
-  // POSTERIOR HIP — FIXED: moved to y=152 (first y without back arms)
-  {id:"b29",label:"Left Posterior Hip",        cx:159,cy:152},
-  {id:"b30",label:"Right Posterior Hip",       cx:204,cy:152},
-  // HAMSTRINGS (y=161:[159,204])
-  {id:"b31",label:"Left Proximal Hamstring",   cx:167,cy:161},
-  {id:"b32",label:"Right Proximal Hamstring",  cx:195,cy:161},
-  {id:"b33",label:"Left Mid Hamstring",        cx:167,cy:181},
-  {id:"b34",label:"Right Mid Hamstring",       cx:195,cy:181},
-  // POSTERIOR KNEE (y=204:[164,199])
-  {id:"b35",label:"Left Popliteal",            cx:168,cy:204},
-  {id:"b36",label:"Right Popliteal",           cx:194,cy:204},
-  // CALVES (y=222:[167,196])
-  {id:"b37",label:"Left Gastrocnemius",        cx:171,cy:222},
-  {id:"b38",label:"Right Gastrocnemius",       cx:192,cy:222},
-  // ACHILLES (y=233:[161,201])
-  {id:"b39",label:"Left Achilles",             cx:168,cy:233},
-  {id:"b40",label:"Right Achilles",            cx:194,cy:233},
+  {id:"b01",label:"Post Skull",       cx:181,cy:15},
+  {id:"b02",label:"L Post Head",      cx:174,cy:23},
+  {id:"b03",label:"R Post Head",      cx:188,cy:23},
+  {id:"b04",label:"L Post Neck",      cx:170,cy:50},
+  {id:"b05",label:"R Post Neck",      cx:192,cy:50},
+  {id:"b06",label:"Post Neck Centre", cx:181,cy:44},
+  {id:"b07",label:"L Post Shoulder",  cx:153,cy:59},
+  {id:"b08",label:"R Post Shoulder",  cx:209,cy:59},
+  {id:"b09",label:"L Upper Back",     cx:169,cy:63},
+  {id:"b10",label:"R Upper Back",     cx:193,cy:63},
+  {id:"b11",label:"L Lower Thoracic", cx:169,cy:77},
+  {id:"b12",label:"R Lower Thoracic", cx:193,cy:77},
+  {id:"b13",label:"L UpperArm Prox",  cx:152,cy:69},
+  {id:"b14",label:"R UpperArm Prox",  cx:210,cy:69},
+  {id:"b15",label:"L UpperArm Mid",   cx:151,cy:80},
+  {id:"b16",label:"R UpperArm Mid",   cx:211,cy:80},
+  {id:"b17",label:"L UpperArm Dist",  cx:149,cy:92},
+  {id:"b18",label:"R UpperArm Dist",  cx:213,cy:92},
+  {id:"b19",label:"L Post Elbow",     cx:149,cy:101},
+  {id:"b20",label:"R Post Elbow",     cx:213,cy:101},
+  {id:"b21",label:"L LowerArm Prox",  cx:148,cy:111},
+  {id:"b22",label:"R LowerArm Prox",  cx:214,cy:111},
+  {id:"b23",label:"L LowerArm Mid",   cx:147,cy:119},
+  {id:"b24",label:"R LowerArm Mid",   cx:215,cy:119},
+  {id:"b25",label:"L LowerArm Dist",  cx:146,cy:128},
+  {id:"b26",label:"R LowerArm Dist",  cx:216,cy:128},
+  {id:"b27",label:"L Post Wrist",     cx:146,cy:135},
+  {id:"b28",label:"R Post Wrist",     cx:216,cy:135},
+  {id:"b29",label:"L Hand Dorsum",    cx:142,cy:145},
+  {id:"b30",label:"R Hand Dorsum",    cx:220,cy:145},
+  {id:"b31",label:"L Lumbar Prox",    cx:173,cy:93},
+  {id:"b32",label:"R Lumbar Prox",    cx:189,cy:93},
+  {id:"b33",label:"L Lumbar Mid",     cx:174,cy:106},
+  {id:"b34",label:"R Lumbar Mid",     cx:188,cy:106},
+  {id:"b35",label:"L Lumbar Dist",    cx:174,cy:119},
+  {id:"b36",label:"R Lumbar Dist",    cx:188,cy:119},
+  {id:"b37",label:"Left Gluteus",     cx:168,cy:136},
+  {id:"b38",label:"Right Gluteus",    cx:194,cy:136},
+  {id:"b39",label:"L Post Hip",       cx:163,cy:129},
+  {id:"b40",label:"R Post Hip",       cx:199,cy:129},
+  {id:"b41",label:"L Hamstring Prox", cx:167,cy:152},
+  {id:"b42",label:"R Hamstring Prox", cx:195,cy:152},
+  {id:"b43",label:"L Hamstring Mid",  cx:168,cy:165},
+  {id:"b44",label:"R Hamstring Mid",  cx:194,cy:165},
+  {id:"b45",label:"L Hamstring Dist", cx:168,cy:177},
+  {id:"b46",label:"R Hamstring Dist", cx:194,cy:177},
+  {id:"b57",label:"L Post Knee",      cx:168,cy:190},
+  {id:"b58",label:"R Post Knee",      cx:194,cy:190},
+  {id:"b47",label:"L Calf Prox",      cx:168,cy:201},
+  {id:"b48",label:"R Calf Prox",      cx:194,cy:201},
+  {id:"b49",label:"L Calf Mid",       cx:169,cy:210},
+  {id:"b50",label:"R Calf Mid",       cx:193,cy:210},
+  {id:"b51",label:"L Calf Dist",      cx:171,cy:221},
+  {id:"b52",label:"R Calf Dist",      cx:191,cy:221},
+  {id:"b53",label:"L Post Ankle",     cx:171,cy:233},
+  {id:"b54",label:"R Post Ankle",     cx:191,cy:233},
+  {id:"b55",label:"Left Heel",        cx:171,cy:242},
+  {id:"b56",label:"Right Heel",       cx:191,cy:242},
 ];
 const ALL_DOTS=[...FRONT_DOTS,...BACK_DOTS];
 
@@ -312,6 +332,9 @@ function AsymmetryOverlay({regions}){
       <img src={src} width={520} height={560} style={{display:"block"}}/>
       <div style={{position:"absolute",right:10,top:24,display:"flex",gap:5,alignItems:"stretch"}}>
         <div style={{width:12,height:180,borderRadius:6,background:"linear-gradient(to bottom,rgb(139,0,0) 0%,rgb(255,255,255) 100%)"}}/>
+        <div style={{display:"flex",flexDirection:"column",justifyContent:"space-between",fontSize:10,color:"#64748b",height:180}}>
+          <span>+2°</span><span>0°</span>
+        </div>
       </div>
     </div>
   );
@@ -328,13 +351,13 @@ Return ONLY a valid JSON object. No markdown, no code fences, no explanation, no
 RESPONSE STRUCTURE:
 {"athlete":{"name":"...","sport":"...","age":25,"scanDate":"2024-05-28"},"regions":[{"id":"f01","label":"Forehead","temp":34.2}, ...],"findings":["...","...","..."]}
 
-REGION IDS — you MUST include ALL 80 regions, no omissions:
+REGION IDS — you MUST include ALL 116 regions, no omissions:
 
-ANTERIOR (40 regions):
-f01=Forehead, f02=Left Temple, f03=Right Temple, f04=Throat, f05=Left Neck, f06=Right Neck, f07=Left Anterior Shoulder, f08=Right Anterior Shoulder, f09=Left Pectoral, f10=Right Pectoral, f11=Sternum, f12=Left Bicep, f13=Right Bicep, f14=Left Anterior Elbow, f15=Right Anterior Elbow, f16=Left Forearm, f17=Right Forearm, f18=Left Wrist, f19=Right Wrist, f20=Left Hand, f21=Right Hand, f22=Upper Abdomen, f23=Navel, f24=Lower Abdomen, f25=Left Oblique, f26=Right Oblique, f27=Left Hip, f28=Right Hip, f29=Left Groin, f30=Right Groin, f31=Left Quadricep, f32=Right Quadricep, f33=Left Inner Thigh, f34=Right Inner Thigh, f35=Left Anterior Knee, f36=Right Anterior Knee, f37=Left Shin, f38=Right Shin, f39=Left Anterior Ankle, f40=Right Anterior Ankle
+ANTERIOR (58 regions):
+f01=Forehead, f02=Left Temple, f03=Right Temple, f06=Throat, f04=Left Neck, f05=Right Neck, f07=Left Shoulder, f08=Right Shoulder, f09=L Upper Chest, f10=R Upper Chest, f11=L Lower Chest, f12=R Lower Chest, f13=L UpperArm Prox, f14=R UpperArm Prox, f15=L UpperArm Mid, f16=R UpperArm Mid, f17=L UpperArm Dist, f18=R UpperArm Dist, f19=Left Elbow, f20=Right Elbow, f21=L LowerArm Prox, f22=R LowerArm Prox, f23=L LowerArm Mid, f24=R LowerArm Mid, f25=L LowerArm Dist, f26=R LowerArm Dist, f27=Left Wrist, f28=Right Wrist, f29=Left Fingers, f30=Right Fingers, f31=L Abdomen Prox, f32=R Abdomen Prox, f33=L Abdomen Mid, f34=R Abdomen Mid, f35=L Abdomen Dist, f36=R Abdomen Dist, f37=Left Hip, f38=Right Hip, f39=Left Groin, f40=Right Groin, f41=L Quad Prox, f42=R Quad Prox, f43=L Quad Mid, f44=R Quad Mid, f45=L Quad Dist, f46=R Quad Dist, f55=Left Knee, f56=Right Knee, f47=L Calf Prox, f48=R Calf Prox, f49=L Calf Mid, f50=R Calf Mid, f51=L Calf Dist, f52=R Calf Dist, f53=Left Ankle, f54=Right Ankle, f57=Left Forefoot, f58=Right Forefoot
 
-POSTERIOR (40 regions):
-b01=Posterior Skull, b02=Left Posterior Head, b03=Right Posterior Head, b04=Posterior Neck, b05=Left Cervical Paraspinal, b06=Right Cervical Paraspinal, b07=Left Trapezius, b08=Right Trapezius, b09=Left Posterior Shoulder, b10=Right Posterior Shoulder, b11=Left Scapula, b12=Right Scapula, b13=Left Tricep, b14=Right Tricep, b15=Left Posterior Elbow, b16=Right Posterior Elbow, b17=Left Posterior Forearm, b18=Right Posterior Forearm, b19=Left Posterior Wrist, b20=Right Posterior Wrist, b21=Mid Thoracic Spine, b22=Left Latissimus Dorsi, b23=Right Latissimus Dorsi, b24=Left Lumbar Paraspinal, b25=Right Lumbar Paraspinal, b26=Sacrum, b27=Left Gluteus, b28=Right Gluteus, b29=Left Posterior Hip, b30=Right Posterior Hip, b31=Left Proximal Hamstring, b32=Right Proximal Hamstring, b33=Left Mid Hamstring, b34=Right Mid Hamstring, b35=Left Popliteal, b36=Right Popliteal, b37=Left Gastrocnemius, b38=Right Gastrocnemius, b39=Left Achilles, b40=Right Achilles
+POSTERIOR (58 regions):
+b01=Post Skull, b02=L Post Head, b03=R Post Head, b06=Post Neck Centre, b04=L Post Neck, b05=R Post Neck, b07=L Post Shoulder, b08=R Post Shoulder, b09=L Upper Back, b10=R Upper Back, b11=L Lower Thoracic, b12=R Lower Thoracic, b13=L UpperArm Prox, b14=R UpperArm Prox, b15=L UpperArm Mid, b16=R UpperArm Mid, b17=L UpperArm Dist, b18=R UpperArm Dist, b19=L Post Elbow, b20=R Post Elbow, b21=L LowerArm Prox, b22=R LowerArm Prox, b23=L LowerArm Mid, b24=R LowerArm Mid, b25=L LowerArm Dist, b26=R LowerArm Dist, b27=L Post Wrist, b28=R Post Wrist, b29=L Hand Dorsum, b30=R Hand Dorsum, b31=L Lumbar Prox, b32=R Lumbar Prox, b33=L Lumbar Mid, b34=R Lumbar Mid, b35=L Lumbar Dist, b36=R Lumbar Dist, b37=Left Gluteus, b38=Right Gluteus, b39=L Post Hip, b40=R Post Hip, b41=L Hamstring Prox, b42=R Hamstring Prox, b43=L Hamstring Mid, b44=R Hamstring Mid, b45=L Hamstring Dist, b46=R Hamstring Dist, b57=L Post Knee, b58=R Post Knee, b47=L Calf Prox, b48=R Calf Prox, b49=L Calf Mid, b50=R Calf Mid, b51=L Calf Dist, b52=R Calf Dist, b53=L Post Ankle, b54=R Post Ankle, b55=Left Heel, b56=Right Heel
 
 PHYSIOLOGICAL TEMPERATURE GUIDELINES (absolute range 30.0–43.0°C):
 
@@ -373,22 +396,22 @@ Resting elevation tiers (above generic baseline):
 - Uninvolved regions: no modification
 
 Sport-specific primary muscle groups:
-- Running / sprinting / track: quadriceps (f31,f32), hamstrings (b31–b34), gastrocnemius (b37,b38), hip flexors/groin (f29,f30), gluteus (b27,b28), achilles (b39,b40)
-- Marathon / endurance running: same as running + calves and achilles more prominent, upper body minimal
-- Swimming: pectorals (f09,f10), trapezius (b07,b08), latissimus dorsi (b22,b23), triceps (b13,b14), posterior shoulder (b09,b10), biceps (f12,f13), forearms (f16,f17) — legs minimal
-- Cycling: quadriceps (f31,f32), gluteus (b27,b28), calves (b37,b38), hip/groin (f27–f30), lumbar paraspinals (b24,b25) — upper body minimal
-- Football / soccer: quadriceps (f31,f32), hamstrings (b31–b34), calves (b37,b38), groin (f29,f30), ankle region (f39,f40,b39,b40), dominant-side asymmetry in lower limb likely
-- American football: quadriceps, hamstrings, gluteus, pectorals, trapezius — high bilateral symmetry expected in linemen, speed-muscle emphasis in skill positions
-- Basketball: quadriceps, calves, achilles, popliteal (b35,b36), shoulders (f07,f08)
-- Tennis / racket sports: dominant-arm shoulder (f07 or f08), dominant bicep/tricep, dominant forearm and wrist (f18 or f19) significantly elevated; notable asymmetry between dominant and non-dominant arm is physiologically normal
-- Volleyball: shoulders (f07,f08,b09,b10), trapezius, quadriceps, calves; dominant arm elevated
-- Gymnastics / diving: core abdomen (f22–f24), obliques (f25,f26), hip flexors (f27,f28), shoulders, lumbar paraspinals (b24,b25), inner thighs (f33,f34)
-- Rowing / kayaking: latissimus dorsi (b22,b23), lumbar paraspinals, trapezius, biceps/forearms, quadriceps
-- Wrestling / MMA / combat sports: trapezius, cervical paraspinals (b05,b06), pectorals, obliques, quadriceps, inner thighs — global elevation, prominent upper back
-- Weightlifting / powerlifting: sport-specific: squats → quads/glutes/lumbar; bench → pectorals/triceps/anterior shoulder; deadlift → lumbar paraspinals/hamstrings/traps
-- Baseball / cricket / throwing sports: dominant-arm shoulder, posterior rotator cuff (b09 or b10), bicep, forearm — marked dominant/non-dominant asymmetry
-- Ice hockey / field hockey: quadriceps, adductors (f33,f34), hip flexors, core, forearms
-- Skiing / snowboarding: quadriceps (very prominent), inner thighs, gluteus, lumbar, ankle region
+- Running / sprinting / track: quadriceps (f41,f42), hamstrings (b41–b44), gastrocnemius (b47,b48), hip flexors/groin (f39,f40), gluteus (b37,b38), achilles/ankle (b53,b54)
+- Marathon / endurance running: same as running + calves (b49,b50) and ankle (b53,b54) more prominent, upper body minimal
+- Swimming: upper chest/pectorals (f09,f10), post shoulder (b07,b08), upper back/lats (b09,b10), upper arm prox (b13,b14), bicep arm (f13,f14), forearms (f21,f22) — legs minimal
+- Cycling: quadriceps (f41,f42), gluteus (b37,b38), calves (b47,b48), hip/groin (f37–f40), lumbar (b31,b32) — upper body minimal
+- Football / soccer: quadriceps (f41,f42), hamstrings (b41–b44), calves (b47,b48), groin (f39,f40), ankle region (f53,f54,b53,b54), dominant-side asymmetry in lower limb likely
+- American football: quadriceps, hamstrings, gluteus, upper chest (f09,f10), post shoulder (b07,b08) — high bilateral symmetry expected in linemen, speed-muscle emphasis in skill positions
+- Basketball: quadriceps, calves, achilles, post knee (b57,b58), shoulders (f07,f08)
+- Tennis / racket sports: dominant-arm shoulder (f07 or f08), dominant upper arm (f13 or f14), dominant forearm and wrist (f21 or f22, f27 or f28) significantly elevated; notable asymmetry between dominant and non-dominant arm is physiologically normal
+- Volleyball: shoulders (f07,f08,b07,b08), upper back, quadriceps, calves; dominant arm elevated
+- Gymnastics / diving: core abdomen (f31–f36), hip flexors (f37,f38), shoulders, lumbar (b31,b32), groin/adductors (f39,f40)
+- Rowing / kayaking: upper back/lats (b09,b10), lumbar (b31,b32), post shoulder (b07,b08), biceps/forearms (f13–f26), quadriceps (f41,f42)
+- Wrestling / MMA / combat sports: post shoulder (b07,b08), post neck (b04,b05), upper chest (f09,f10), abdomen (f31–f36), quadriceps, groin — global elevation, prominent upper back
+- Weightlifting / powerlifting: sport-specific: squats → quads (f41,f42)/glutes (b37,b38)/lumbar (b31,b32); bench → upper chest (f09,f10)/upper arm (b13,b14)/shoulder (f07,f08); deadlift → lumbar (b31,b32)/hamstrings (b41,b42)/upper back (b07,b08)
+- Baseball / cricket / throwing sports: dominant-arm shoulder (f07 or f08), post shoulder (b07 or b08), upper arm (f13 or f14), forearm (f21 or f22) — marked dominant/non-dominant asymmetry
+- Ice hockey / field hockey: quadriceps, groin/adductors (f39,f40), hip flexors, core (f31–f36), forearms (f21–f26)
+- Skiing / snowboarding: quadriceps (very prominent, f41,f42), groin/adductors (f39,f40), gluteus (b37,b38), lumbar (b31,b32), ankle (f53,f54)
 - Triathlon: distribute running + cycling + swimming elevations at moderate levels across all three domains
 - Unknown sport: apply a moderate full-body elevation (+0.5°C in major muscle groups) and note in findings that sport-specific pattern could not be determined
 
@@ -449,31 +472,41 @@ function ThermalScan(){
 
   return(
     <div style={{minHeight:"100vh",background:"#0f1117",color:"#e2e8f0",fontFamily:"'Segoe UI',sans-serif",padding:"24px 16px"}}>
-      <div style={{textAlign:"center",fontSize:22,fontWeight:700,letterSpacing:2,color:"#94a3b8",textTransform:"uppercase",marginBottom:20}}>Thermal Body Scanner</div>
+      <div style={{textAlign:"center",fontSize:22,fontWeight:700,letterSpacing:2,color:"#94a3b8",textTransform:"uppercase",marginBottom:20}}>Thermal Visualisation of Injuries</div>
       <div style={{display:"flex",gap:8,justifyContent:"center",marginBottom:12,flexWrap:"wrap"}}>
         <input type="password" placeholder="Paste Groq API key..." value={apiKey}
           onChange={e=>setApiKey(e.target.value)} onKeyDown={e=>e.key==="Enter"&&generate()}
           style={{background:"#1e2130",border:"1px solid #334155",borderRadius:8,color:"#e2e8f0",padding:"10px 14px",fontSize:14,width:300,outline:"none"}}/>
         <button onClick={generate} disabled={loading}
           style={{background:"linear-gradient(135deg,#3b82f6,#6366f1)",color:"#fff",border:"none",borderRadius:8,padding:"10px 22px",fontSize:15,fontWeight:600,cursor:loading?"not-allowed":"pointer",opacity:loading?0.7:1}}>
-          {loading?"Scanning...":"Generate Thermal Scan"}
+          {loading?"Scanning...":"Generate Thermographic Image"}
         </button>
       </div>
       <div style={{display:"flex",justifyContent:"center",marginBottom:16}}>
         <div style={{width:"100%",maxWidth:636}}>
-          <div style={{fontSize:11,fontWeight:700,color:"#475569",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Athlete Conditions <span style={{color:"#334155",fontWeight:400,textTransform:"none",letterSpacing:0}}>(environment, injuries, illnesses, medications…)</span></div>
-          <textarea
-            placeholder="e.g. Cold outdoor environment (~5°C), right hamstring strain 3 days old, mild fever 37.8°C, heavy training session 2h ago..."
-            value={conditions}
-            onChange={e=>setConditions(e.target.value)}
-            rows={3}
-            style={{width:"100%",background:"#1e2130",border:"1px solid #334155",borderRadius:8,color:"#e2e8f0",padding:"10px 14px",fontSize:13,outline:"none",resize:"vertical",boxSizing:"border-box",lineHeight:1.5}}
-          />
+          <div style={{fontSize:11,fontWeight:700,color:"#475569",textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>Type of Injury</div>
+          <div style={{display:"flex",gap:6,alignItems:"flex-start"}}>
+            <textarea
+              placeholder="e.g. Strain in the left Hamstring"
+              value={conditions}
+              onChange={e=>setConditions(e.target.value)}
+              rows={3}
+              style={{flex:1,background:"#1e2130",border:"1px solid #334155",borderRadius:8,color:"#e2e8f0",padding:"10px 14px",fontSize:13,outline:"none",resize:"vertical",boxSizing:"border-box",lineHeight:1.5}}
+            />
+            <button
+              onClick={()=>{const list=["Right ACL tear","Left ACL tear","Right medial meniscus tear","Left medial meniscus tear","Right hamstring strain","Left hamstring strain","Right quadriceps strain","Left quadriceps strain","Right adductor strain","Left adductor strain","Right lateral ankle sprain","Left lateral ankle sprain","Right Achilles tendonitis","Left Achilles tendonitis","Right patellar tendonitis","Left patellar tendonitis","Right shin splints","Left shin splints","Right calf strain","Left calf strain","Right plantar fasciitis","Left plantar fasciitis","Right fifth metatarsal fracture","Left fifth metatarsal fracture","Right IT band syndrome","Left IT band syndrome","Right rotator cuff tendonitis","Left rotator cuff tendonitis","Right shoulder dislocation","Left shoulder dislocation","Right tennis elbow","Left tennis elbow","Right golfer's elbow","Left golfer's elbow","Right wrist sprain","Left wrist sprain","Right scaphoid fracture","Left scaphoid fracture","Right thumb sprain","Left thumb sprain","Right finger dislocation","Left finger dislocation","Concussion","Right lumbar muscle strain","Left lumbar muscle strain","Cervical whiplash","Right rib contusion","Left rib contusion","Right hip pointer","Left hip pointer"];setConditions(list[Math.floor(Math.random()*list.length)]);}}
+              style={{background:"#1e2130",border:"1px solid #334155",borderRadius:8,color:"#e2e8f0",padding:"10px 12px",fontSize:18,cursor:"pointer",lineHeight:1,whiteSpace:"nowrap",alignSelf:"flex-start"}}
+              title="Pick a random injury"
+            >&#10024;&#10024;</button>
+          </div>
         </div>
       </div>
       {error&&<div style={{textAlign:"center",color:"#f87171",marginBottom:12,fontSize:14}}>{error}</div>}
-      <div style={{display:"flex",gap:28,justifyContent:"center",flexWrap:"wrap",alignItems:"flex-start"}}>
-        <div style={{background:"#161b2e",borderRadius:16,padding:"20px 16px",display:"flex",flexDirection:"column",gap:12}}>
+      <div style={{display:"flex",justifyContent:"center"}}>
+        <div style={{background:"#161b2e",borderRadius:16,padding:"20px 24px",display:"flex",flexDirection:"column",gap:12}}>
+
+          <div style={{textAlign:"center",fontSize:13,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:2,paddingBottom:6}}>Absolute Thermographic Image</div>
+
           <div style={{position:"relative",display:"inline-block"}}>
             {activeData&&(
               <div style={{position:"absolute",background:"rgba(15,17,23,0.95)",border:"1px solid #475569",borderRadius:8,padding:"8px 14px",fontSize:13,color:"#e2e8f0",pointerEvents:"none",top:12,left:"50%",transform:"translateX(-50%)",whiteSpace:"nowrap",zIndex:20,boxShadow:"0 4px 20px rgba(0,0,0,.7)"}}>
@@ -492,32 +525,47 @@ function ThermalScan(){
               </div>
             </div>
           </div>
-          {scan&&!loading&&<AsymmetryOverlay regions={scan.regions}/>}
-        </div>
-        <div style={{background:"#161b2e",borderRadius:16,padding:24,minWidth:280,maxWidth:340,flex:1}}>
-          {scan?(
-            <>
-              <div style={{fontSize:20,fontWeight:700,color:"#f1f5f9",marginBottom:2}}>{scan.athlete.name}</div>
-              <div style={{fontSize:13,color:"#64748b",marginBottom:18}}>{scan.athlete.sport} · Age {scan.athlete.age} · {scan.athlete.scanDate}</div>
-              <div style={{display:"inline-flex",alignItems:"center",gap:6,background:riskColor+"22",border:`1px solid ${riskColor}`,color:riskColor,borderRadius:20,padding:"4px 14px",fontSize:13,fontWeight:700,marginBottom:20}}>
-                ● Risk: {riskLabel} ({risk}/100)
+
+          <div style={{display:"flex",width:520}}>
+            <div style={{width:260,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+              <span style={{fontSize:12,color:"#94a3b8",fontWeight:600,letterSpacing:1}}>Front</span>
+              <div style={{display:"flex",width:"70%",justifyContent:"space-between"}}>
+                <span style={{fontSize:10,color:"#64748b"}}>Left</span>
+                <span style={{fontSize:10,color:"#64748b"}}>Right</span>
               </div>
-              <div style={{fontSize:12,fontWeight:700,color:"#475569",textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>Clinical Findings</div>
-              {scan.findings.map((f,i)=>(
-                <div key={i} style={{display:"flex",gap:8,marginBottom:10,fontSize:14,lineHeight:1.5,color:"#cbd5e1"}}>
-                  <span style={{color:"#f59e0b",flexShrink:0}}>⚠</span><span>{f}</span>
-                </div>
-              ))}
-              <div style={{marginTop:20,fontSize:11,color:"#334155",lineHeight:1.6}}>Click anywhere on the body<br/>to inspect the nearest region</div>
-            </>
-          ):(
-            <div style={{color:"#334155",fontSize:14,marginTop:32,textAlign:"center",lineHeight:1.9}}>
-              Enter your Groq API key and click<br/>
-              <strong style={{color:"#475569"}}>Generate Thermal Scan</strong><br/>
-              to produce a full-body heatmap.<br/><br/>
-              80 anatomical measurement points<br/>rendered as a continuous thermal image.
             </div>
+            <div style={{width:260,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+              <span style={{fontSize:12,color:"#94a3b8",fontWeight:600,letterSpacing:1}}>Back</span>
+              <div style={{display:"flex",width:"70%",justifyContent:"space-between"}}>
+                <span style={{fontSize:10,color:"#64748b"}}>Left</span>
+                <span style={{fontSize:10,color:"#64748b"}}>Right</span>
+              </div>
+            </div>
+          </div>
+
+          {scan&&!loading&&(
+            <>
+              <div style={{textAlign:"center",fontSize:13,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:2,paddingTop:8,paddingBottom:6,borderTop:"1px solid #1e2a3a"}}>Relative Bilateral Hot Spots</div>
+              <AsymmetryOverlay regions={scan.regions}/>
+              <div style={{display:"flex",width:520}}>
+                <div style={{width:260,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+                  <span style={{fontSize:12,color:"#94a3b8",fontWeight:600,letterSpacing:1}}>Front</span>
+                  <div style={{display:"flex",width:"70%",justifyContent:"space-between"}}>
+                    <span style={{fontSize:10,color:"#64748b"}}>Left</span>
+                    <span style={{fontSize:10,color:"#64748b"}}>Right</span>
+                  </div>
+                </div>
+                <div style={{width:260,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+                  <span style={{fontSize:12,color:"#94a3b8",fontWeight:600,letterSpacing:1}}>Back</span>
+                  <div style={{display:"flex",width:"70%",justifyContent:"space-between"}}>
+                    <span style={{fontSize:10,color:"#64748b"}}>Left</span>
+                    <span style={{fontSize:10,color:"#64748b"}}>Right</span>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
+
         </div>
       </div>
     </div>
