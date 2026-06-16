@@ -271,9 +271,9 @@ Temp values must be realistic skin temperatures between 30.0 and 37.0°C. Introd
     },
     columns: {
       display: "flex",
+      flexDirection: "row",
       gap: 28,
       justifyContent: "center",
-      flexWrap: "wrap",
       alignItems: "flex-start",
       marginTop: 8,
     },

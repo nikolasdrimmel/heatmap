@@ -503,49 +503,51 @@ function ThermalScan(){
       </div>
       {error&&<div style={{textAlign:"center",color:"#f87171",marginBottom:12,fontSize:14}}>{error}</div>}
       <div style={{display:"flex",justifyContent:"center"}}>
-        <div style={{background:"#161b2e",borderRadius:16,padding:"20px 24px",display:"flex",flexDirection:"column",gap:12}}>
+        <div style={{background:"#161b2e",borderRadius:16,padding:"20px 24px",display:"flex",flexDirection:"row",gap:24,alignItems:"flex-start"}}>
 
-          <div style={{textAlign:"center",fontSize:13,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:2,paddingBottom:6}}>Absolute Thermographic Image</div>
+          <div style={{display:"flex",flexDirection:"column",gap:12}}>
+            <div style={{textAlign:"center",fontSize:13,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:2,paddingBottom:6}}>Absolute Thermographic Image</div>
 
-          <div style={{position:"relative",display:"inline-block"}}>
-            {activeData&&(
-              <div style={{position:"absolute",background:"rgba(15,17,23,0.95)",border:"1px solid #475569",borderRadius:8,padding:"8px 14px",fontSize:13,color:"#e2e8f0",pointerEvents:"none",top:12,left:"50%",transform:"translateX(-50%)",whiteSpace:"nowrap",zIndex:20,boxShadow:"0 4px 20px rgba(0,0,0,.7)"}}>
-                <strong style={{color:"#f1f5f9"}}>{activeData.label}</strong>
-                <span style={{color:"#64748b",margin:"0 6px"}}>·</span>
-                <span style={{color:tempToColor(activeData.temp),fontWeight:700}}>{activeData.temp.toFixed(1)}°C</span>
-              </div>
-            )}
-            <BodyOverlay regions={scan?.regions} onBodyClick={id=>setActive(p=>p===id?null:id)} pulsing={loading} activeId={active}/>
-            {loading&&<div style={{textAlign:"center",color:"#475569",fontSize:12,marginTop:8,letterSpacing:1}}>Scanning athlete…</div>}
-            {!loading&&!scan&&<div style={{textAlign:"center",color:"#334155",fontSize:12,marginTop:8}}>Click body after scan to inspect region</div>}
-            <div style={{position:"absolute",right:10,top:24,display:"flex",gap:5,alignItems:"stretch"}}>
-              <div style={{width:12,height:180,borderRadius:6,background:GRADIENT}}/>
-              <div style={{display:"flex",flexDirection:"column",justifyContent:"space-between",fontSize:10,color:"#64748b",height:180}}>
-                <span>43°C</span><span>37°C</span><span>35°C</span><span>30°C</span>
-              </div>
-            </div>
-          </div>
-
-          <div style={{display:"flex",width:520}}>
-            <div style={{width:260,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
-              <span style={{fontSize:12,color:"#94a3b8",fontWeight:600,letterSpacing:1}}>Front</span>
-              <div style={{display:"flex",width:"70%",justifyContent:"space-between"}}>
-                <span style={{fontSize:10,color:"#64748b"}}>Left</span>
-                <span style={{fontSize:10,color:"#64748b"}}>Right</span>
+            <div style={{position:"relative",display:"inline-block"}}>
+              {activeData&&(
+                <div style={{position:"absolute",background:"rgba(15,17,23,0.95)",border:"1px solid #475569",borderRadius:8,padding:"8px 14px",fontSize:13,color:"#e2e8f0",pointerEvents:"none",top:12,left:"50%",transform:"translateX(-50%)",whiteSpace:"nowrap",zIndex:20,boxShadow:"0 4px 20px rgba(0,0,0,.7)"}}>
+                  <strong style={{color:"#f1f5f9"}}>{activeData.label}</strong>
+                  <span style={{color:"#64748b",margin:"0 6px"}}>·</span>
+                  <span style={{color:tempToColor(activeData.temp),fontWeight:700}}>{activeData.temp.toFixed(1)}°C</span>
+                </div>
+              )}
+              <BodyOverlay regions={scan?.regions} onBodyClick={id=>setActive(p=>p===id?null:id)} pulsing={loading} activeId={active}/>
+              {loading&&<div style={{textAlign:"center",color:"#475569",fontSize:12,marginTop:8,letterSpacing:1}}>Scanning athlete…</div>}
+              {!loading&&!scan&&<div style={{textAlign:"center",color:"#334155",fontSize:12,marginTop:8}}>Click body after scan to inspect region</div>}
+              <div style={{position:"absolute",right:10,top:24,display:"flex",gap:5,alignItems:"stretch"}}>
+                <div style={{width:12,height:180,borderRadius:6,background:GRADIENT}}/>
+                <div style={{display:"flex",flexDirection:"column",justifyContent:"space-between",fontSize:10,color:"#64748b",height:180}}>
+                  <span>43°C</span><span>37°C</span><span>35°C</span><span>30°C</span>
+                </div>
               </div>
             </div>
-            <div style={{width:260,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
-              <span style={{fontSize:12,color:"#94a3b8",fontWeight:600,letterSpacing:1}}>Back</span>
-              <div style={{display:"flex",width:"70%",justifyContent:"space-between"}}>
-                <span style={{fontSize:10,color:"#64748b"}}>Left</span>
-                <span style={{fontSize:10,color:"#64748b"}}>Right</span>
+
+            <div style={{display:"flex",width:520}}>
+              <div style={{width:260,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+                <span style={{fontSize:12,color:"#94a3b8",fontWeight:600,letterSpacing:1}}>Front</span>
+                <div style={{display:"flex",width:"70%",justifyContent:"space-between"}}>
+                  <span style={{fontSize:10,color:"#64748b"}}>Left</span>
+                  <span style={{fontSize:10,color:"#64748b"}}>Right</span>
+                </div>
+              </div>
+              <div style={{width:260,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+                <span style={{fontSize:12,color:"#94a3b8",fontWeight:600,letterSpacing:1}}>Back</span>
+                <div style={{display:"flex",width:"70%",justifyContent:"space-between"}}>
+                  <span style={{fontSize:10,color:"#64748b"}}>Left</span>
+                  <span style={{fontSize:10,color:"#64748b"}}>Right</span>
+                </div>
               </div>
             </div>
           </div>
 
           {scan&&!loading&&(
-            <>
-              <div style={{textAlign:"center",fontSize:13,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:2,paddingTop:8,paddingBottom:6,borderTop:"1px solid #1e2a3a"}}>Relative Bilateral Hot Spots</div>
+            <div style={{display:"flex",flexDirection:"column",gap:12}}>
+              <div style={{textAlign:"center",fontSize:13,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:2,paddingBottom:6}}>Relative Bilateral Hot Spots</div>
               <AsymmetryOverlay regions={scan.regions}/>
               <div style={{display:"flex",width:520}}>
                 <div style={{width:260,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
@@ -563,7 +565,7 @@ function ThermalScan(){
                   </div>
                 </div>
               </div>
-            </>
+            </div>
           )}
 
         </div>

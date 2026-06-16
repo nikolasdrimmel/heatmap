@@ -195,7 +195,7 @@ const rowStyle = { display: 'flex', alignItems: 'center', gap: '6px' };
 
 export default function ThermalBodyScan() {
   return (
-    <div style={{ background: BG, padding: '24px', display: 'inline-flex', flexDirection: 'column', gap: '20px' }}>
+    <div style={{ background: BG, padding: '24px', display: 'inline-flex', flexDirection: 'row', gap: '20px' }}>
       <div style={rowStyle}>
         <BodySVG shapes={FRONT_SHAPES} data={frontData} mode="thermal" />
         <BodySVG shapes={BACK_SHAPES}  data={backData}  mode="thermal" />
